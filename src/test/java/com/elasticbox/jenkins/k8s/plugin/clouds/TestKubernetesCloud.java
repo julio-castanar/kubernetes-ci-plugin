@@ -30,11 +30,9 @@ import java.util.List;
 
 public class TestKubernetesCloud extends com.elasticbox.jenkins.k8s.plugin.TestBaseKubernetes {
 
-    @Mock
-    protected KubernetesRepository kubernetesRepositoryMock;
+    protected final KubernetesRepository kubernetesRepositoryMock = Mockito.mock(KubernetesRepository.class);
 
-    @Mock
-    protected SlaveProvisioningService slaveProvisioningServiceMock;
+    protected final SlaveProvisioningService slaveProvisioningServiceMock = Mockito.mock(SlaveProvisioningService.class);
 
     @Test
     public void testGetKubernetesClouds() {

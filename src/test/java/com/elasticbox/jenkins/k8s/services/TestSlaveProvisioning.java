@@ -36,9 +36,11 @@ import hudson.model.labels.LabelOperatorPrecedence;
 import hudson.model.labels.LabelVisitor;
 import hudson.slaves.SlaveComputer;
 import hudson.util.VariableResolver;
-import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.PodStatus;
+import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.dsl.MixedOperation;
+import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
+import io.fabric8.kubernetes.client.dsl.PodResource;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -65,7 +67,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({KubernetesSlave.class ,SlaveComputer.class})
-@PowerMockIgnore({"javax.crypto.*" })
+@PowerMockIgnore({"javax.crypto.*", "javax.net.ssl.*", "javax.security.auth.x500.X500Principal"})
 public class TestSlaveProvisioning {
 
     private Injector injector;
@@ -147,7 +149,7 @@ public class TestSlaveProvisioning {
             .load(IOUtils.toInputStream(fakePodSlaveConfig.getPodYaml() ))
             .get();
 
-        pod.setStatus(new PodStatus(null,null,null,null,"Running",null,null,null));
+        pod.setStatus(new PodStatus(null,null,null,null,null,null,"Running",null, null, null, null));
 
         final PodRepository podRepository = injector.getInstance(PodRepository.class);
         when(podRepository.getPod(anyString(), anyString(), anyString())).thenReturn(pod);

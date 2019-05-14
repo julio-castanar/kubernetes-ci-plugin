@@ -20,9 +20,11 @@ import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
+import org.acegisecurity.AccessDeniedException;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -55,7 +57,7 @@ public class ChartRepositoryConfig implements Describable<ChartRepositoryConfig>
 
     @Override
     public Descriptor<ChartRepositoryConfig> getDescriptor() {
-        final Jenkins instance = Jenkins.getInstance();
+        final Jenkins instance = Jenkins.get();
         return (instance != null) ? instance.getDescriptor(getClass() ) : null;
     }
 
@@ -78,22 +80,31 @@ public class ChartRepositoryConfig implements Describable<ChartRepositoryConfig>
             return CHART_REPOSITORY_CONFIGURATION;
         }
 
+        @RequirePOST
         public FormValidation doTestConnection(@QueryParameter String chartsRepoUrl,
                                                @QueryParameter String credentialsId) {
 
-            if (StringUtils.isEmpty(chartsRepoUrl)) {
-                return FormValidation.error("Required fields not provided");
-            }
-
-            ChartRepo chartRepoData = PluginHelper.getChartRepoData(chartsRepoUrl, credentialsId);
-
             try {
+                Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+
+                if (StringUtils.isEmpty(chartsRepoUrl)) {
+                    return FormValidation.error("Required fields not provided");
+                }
+
+                ChartRepo chartRepoData = PluginHelper.getChartRepoData(chartsRepoUrl, credentialsId);
+
                 final List<String> chartNames = chartRepository.chartNames(chartRepoData);
-                if (chartNames != null && !chartNames.isEmpty() ) {
+                if (chartNames != null && !chartNames.isEmpty()) {
                     return FormValidation.ok("Connection successful");
                 } else {
                     return FormValidation.error("Invalid repository");
                 }
+
+            } catch (AccessDeniedException excep) {
+                String msg = "Connection error - " + excep.getMessage();
+                LOGGER.severe(msg);
+                return FormValidation.error(msg);
+
             } catch (RepositoryException excep) {
                 String msg = "Connection error - " + excep.getCausedByMessages();
                 LOGGER.severe(msg);
@@ -101,8 +112,8 @@ public class ChartRepositoryConfig implements Describable<ChartRepositoryConfig>
             }
         }
 
-        public ListBoxModel doFillCredentialsIdItems(@QueryParameter String endpointUrl) {
-            return PluginHelper.doFillCredentialsIdItems(endpointUrl);
+        public ListBoxModel doFillCredentialsIdItems(@QueryParameter String chartsRepoUrl) {
+            return PluginHelper.doFillCredentialsIdItems(chartsRepoUrl);
         }
     }
 

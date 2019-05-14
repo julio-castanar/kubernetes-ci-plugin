@@ -80,7 +80,7 @@ public class PluginInitializer {
                 + "Kubernetes Cloud found! Checking if local Kubernetes cloud is configured at: "
                 + kubernetesUri);
 
-        final Jenkins jenkins = Jenkins.getInstance();
+        final Jenkins jenkins = Jenkins.get();
         if (jenkins == null) {
             return;
         }

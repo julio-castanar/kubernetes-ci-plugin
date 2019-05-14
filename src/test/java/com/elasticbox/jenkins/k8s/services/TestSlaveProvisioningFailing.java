@@ -65,7 +65,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({KubernetesSlave.class ,SlaveComputer.class})
-@PowerMockIgnore({"javax.crypto.*" })
+@PowerMockIgnore({"javax.crypto.*", "javax.net.ssl.*", "javax.security.auth.x500.X500Principal"})
 public class TestSlaveProvisioningFailing {
 
     private Injector injector;
@@ -136,7 +136,8 @@ public class TestSlaveProvisioningFailing {
             .load(IOUtils.toInputStream(fakePodSlaveConfig.getPodYaml() ))
             .get();
 
-        pod.setStatus(new PodStatus(null,null,null,null,"Running",null,null,null));
+        pod.setStatus(new PodStatus(null,null,null,null,null,null,"Running",null, null, null, null));
+
 
         final PodRepository podRepository = injector.getInstance(PodRepository.class);
         when(podRepository.getPod(anyString(), anyString(), anyString())).thenReturn(pod);
@@ -172,7 +173,7 @@ public class TestSlaveProvisioningFailing {
             .load(IOUtils.toInputStream(fakePodSlaveConfig.getPodYaml() ))
             .get();
 
-        pod.setStatus(new PodStatus(null,null,null,null,"Failed",null,null,null));
+        pod.setStatus(new PodStatus(null,null,null,null,null,null,"Failed",null, null, null, null));
 
         final PodRepository podRepository = injector.getInstance(PodRepository.class);
         when(podRepository.getPod(anyString(), anyString(), anyString())).thenReturn(pod);

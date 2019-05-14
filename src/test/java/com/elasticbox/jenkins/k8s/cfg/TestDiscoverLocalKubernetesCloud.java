@@ -46,7 +46,7 @@ public class TestDiscoverLocalKubernetesCloud {
     private static File fileMock = Mockito.mock(File.class);
 
     @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+    public JenkinsRule jenkinsRule = new JenkinsRule();
 
     private static TestLogHandler testLogHandler = new TestLogHandler();
 
@@ -88,7 +88,7 @@ public class TestDiscoverLocalKubernetesCloud {
     public void testAutoDiscoverCloud() {
 
         // Testing first PluginInitializer run that should detect and add the local cloud:
-        KubernetesCloud cloud = (KubernetesCloud) jenkins.getInstance().getCloud(PluginInitializer.LOCAL_CLOUD_NAME);
+        KubernetesCloud cloud = (KubernetesCloud) jenkinsRule.getInstance().getCloud(PluginInitializer.LOCAL_CLOUD_NAME);
         Assert.assertNotNull("Local Kubernetes cloud not found", cloud);
 
         Assert.assertNotNull("Default chart repository configuration not included", cloud.getChartRepositoryConfigurations() );

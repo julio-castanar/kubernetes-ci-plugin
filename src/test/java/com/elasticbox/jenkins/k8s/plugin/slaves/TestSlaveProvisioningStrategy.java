@@ -32,8 +32,8 @@ import java.util.concurrent.TimeoutException;
 @PrepareForTest(KubernetesCloud.class)
 public class TestSlaveProvisioningStrategy {
 
-    @Mock
-    private KubernetesCloud kubeCloudMock1, kubeCloudMock2;
+    private final KubernetesCloud kubeCloudMock1 = Mockito.mock(KubernetesCloud.class);
+    private final KubernetesCloud kubeCloudMock2 = Mockito.mock(KubernetesCloud.class);
 
     @Before
     public void setupMocks() throws Exception {

@@ -47,7 +47,7 @@ public class KubernetesSlave extends AbstractCloudSlave {
             EXECUTORS,
             Mode.NORMAL,
             label == null ? null : label.toString(),
-            new JNLPLauncher(),
+            new JNLPLauncher(true),
             new SingleUseRetentionStrategy(IDLE_MINUTES),
             Collections.<NodeProperty<Node>>emptyList());
 

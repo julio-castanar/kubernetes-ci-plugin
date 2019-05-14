@@ -21,6 +21,7 @@ import java.util.Arrays;
  */
 public class GitHubUrl {
 
+    private String relativeToRepoPath = "";
     private String baseUrl;
     private URI parsedUrl;
 
@@ -33,19 +34,40 @@ public class GitHubUrl {
         }
     }
 
-    private static String normalize(String url) {
+    private  String normalize(String url) {
 
         if (StringUtils.isBlank(url)) {
             return null;
         }
-        // Strip "/tree/..."
-        if (url.contains("/tree/")) {
-            url = url.replaceFirst("/tree/.*$", "");
+        int pos = url.indexOf("/tree/");
+        if ( pos >= 0) {
+            initRelativeToRepoPath( url.substring(pos) );
+            // Strip "/tree/..."
+            url = url.substring(0, pos);
         }
         if (!url.endsWith("/")) {
             url += '/';
         }
         return url;
+    }
+
+    private void initRelativeToRepoPath(String branchPath) {
+        // Gets string after second slash "/tree/<branch>/..."
+        int fromIndex = 0;
+        int slashOrder = 2;
+        do {
+            fromIndex = branchPath.indexOf("/", fromIndex + 1);
+            slashOrder-- ;
+        } while ((fromIndex >= 0) && (slashOrder > 0)) ;
+
+        if (slashOrder == 0 ) {
+            if (branchPath.endsWith("/")) {
+                relativeToRepoPath = branchPath.substring(fromIndex + 1, branchPath.length() - 1);
+            } else {
+                relativeToRepoPath = branchPath.substring(fromIndex + 1 );
+            }
+
+        }
     }
 
     public String protocol() {
@@ -75,7 +97,7 @@ public class GitHubUrl {
 
     public String ownerInCaseOfRepoUrl() {
         final String[] split = parsedUrl.getPath().split("/");
-        if (split.length >= 1 ) {
+        if (split.length > 1 ) {
             return split[1];
         }
         return null;
@@ -83,10 +105,14 @@ public class GitHubUrl {
 
     public String repoInCaseOfRepoUrl() {
         final String[] split = parsedUrl.getPath().split("/");
-        if (split.length >= 2 ) {
+        if (split.length > 2 ) {
             return split[2];
         }
         return null;
+    }
+
+    public String relativeToRepoPathInCaseOfRepoUrl() {
+        return this.relativeToRepoPath;
     }
 
     public String path() {

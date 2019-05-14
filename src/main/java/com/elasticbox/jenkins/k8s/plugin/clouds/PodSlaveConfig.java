@@ -62,7 +62,7 @@ public class PodSlaveConfig implements Describable<PodSlaveConfig> {
 
     @Override
     public Descriptor<PodSlaveConfig> getDescriptor() {
-        final Jenkins instance = Jenkins.getInstance();
+        final Jenkins instance = Jenkins.get();
         return (instance != null) ? instance.getDescriptor(getClass() ) : null;
     }
 

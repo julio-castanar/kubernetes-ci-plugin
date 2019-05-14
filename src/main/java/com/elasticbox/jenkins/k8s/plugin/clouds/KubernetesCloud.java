@@ -33,6 +33,7 @@ import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import javax.net.ssl.SSLHandshakeException;
 import java.util.ArrayList;
@@ -87,7 +88,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
     public static List<KubernetesCloud> getKubernetesClouds() {
         List<KubernetesCloud> clouds = new ArrayList<>();
 
-        final Jenkins instance = Jenkins.getInstance();
+        final Jenkins instance = Jenkins.get();
         if (instance != null) {
             for (Cloud cloud : instance.clouds) {
                 if (cloud instanceof KubernetesCloud) {
@@ -99,7 +100,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
     }
 
     public static KubernetesCloud getKubernetesCloud(String kubeName) {
-        final Jenkins instance = Jenkins.getInstance();
+        final Jenkins instance = Jenkins.get();
 
         if (instance == null) {
             return null;
@@ -267,6 +268,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
             return PluginHelper.doFillNamespaceItems(kubeRepository.getNamespaces(kubeCloudParams) );
         }
 
+        @RequirePOST
         public FormValidation doTestConnection(@QueryParameter String endpointUrl,
                                                @QueryParameter String namespace,
                                                @QueryParameter String credentialsId,

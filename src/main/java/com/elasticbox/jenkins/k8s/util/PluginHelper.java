@@ -8,11 +8,13 @@
 
 package com.elasticbox.jenkins.k8s.util;
 
+import com.cloudbees.plugins.credentials.Credentials;
+import com.cloudbees.plugins.credentials.CredentialsMatcher;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
-import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 import com.elasticbox.jenkins.k8s.auth.Authentication;
@@ -25,6 +27,7 @@ import hudson.security.ACL;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.QueryParameter;
 
 import java.util.Collections;
 import java.util.List;
@@ -89,7 +92,7 @@ public class PluginHelper {
         }
         Authentication authData = null;
         final StandardCredentials credentials = CredentialsMatchers.firstOrNull(
-                CredentialsProvider.lookupCredentials(StandardCredentials.class, Jenkins.getInstance(),
+                CredentialsProvider.lookupCredentials(StandardCredentials.class, Jenkins.get(),
                         ACL.SYSTEM, Collections.<DomainRequirement>emptyList() ),
                 CredentialsMatchers.withId(credentialsId) );
 
@@ -105,23 +108,40 @@ public class PluginHelper {
         return authData;
     }
 
-    public static ListBoxModel doFillCredentialsIdItems(String endpointUrl) {
-        return new StandardListBoxModel()
-                .withEmptySelection()
-                .withMatching(
-                        CredentialsMatchers.anyOf(CredentialsMatchers.instanceOf(TokenCredentialsImpl.class),
-                                CredentialsMatchers.instanceOf(UsernamePasswordCredentials.class)),
-                        CredentialsProvider.lookupCredentials(StandardCredentials.class,
-                                Jenkins.getInstance(),
-                                ACL.SYSTEM,
-                                URIRequirementBuilder.fromUri(endpointUrl).build()));
+
+    public static ListBoxModel doFillCredentialsIdItems(@QueryParameter String endpointUrl) {
+
+        StandardListBoxModel listBoxModel = (StandardListBoxModel) new StandardListBoxModel();
+        listBoxModel.includeEmptyValue();
+
+        // Important! Otherwise you expose credentials metadata to random web requests.
+        if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
+            return listBoxModel;
+        }
+
+        CredentialsMatcher matcher = CredentialsMatchers.anyOf(
+                CredentialsMatchers.instanceOf(TokenCredentialsImpl.class),
+                CredentialsMatchers.instanceOf(UsernamePasswordCredentials.class));
+
+        List<DomainRequirement> domainRequirements = URIRequirementBuilder.fromUri(endpointUrl).build();
+
+        listBoxModel.includeMatchingAs(
+                ACL.SYSTEM,
+                Jenkins.get(),
+                StandardCredentials.class,
+                domainRequirements,
+                matcher );
+
+        return listBoxModel;
+
     }
+
 
     public static ChartRepo getChartRepoData(String chartsRepoUrl, String credentialsId) {
         Authentication authData = PluginHelper.getAuthenticationData(credentialsId);
         ChartRepo chartRepo = new ChartRepo(chartsRepoUrl, authData);
 
-        final ProxyConfiguration proxyConfig = Jenkins.getInstance().proxy;
+        final ProxyConfiguration proxyConfig = Jenkins.get().proxy;
         if (proxyConfig != null) {
             chartRepo.setProxy(proxyConfig.createProxy(chartsRepoUrl) );
 

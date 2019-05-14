@@ -58,7 +58,7 @@ public class KubernetesClientFactoryImpl
     @Override
     public KubernetesClient load(String kubeName) throws Exception {
 
-        final Jenkins instance = Jenkins.getInstance();
+        final Jenkins instance = Jenkins.get();
 
         final Cloud cloud = (instance != null) ? instance.getCloud(kubeName) : null;
 

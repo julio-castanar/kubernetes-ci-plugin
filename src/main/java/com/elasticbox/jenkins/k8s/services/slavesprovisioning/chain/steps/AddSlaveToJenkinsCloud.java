@@ -49,7 +49,7 @@ public class AddSlaveToJenkinsCloud extends AbstractPodDeployment {
                                                         deploymentContext.getCloudToDeployInto(),
                                                         deploymentContext.getJobLabel());
 
-            Jenkins.getInstance().addNode(slave);
+            Jenkins.get().addNode(slave);
 
             LOGGER.log(Level.INFO, "Added: " + slave.getNodeName() + " to Jenkins cloud");
 

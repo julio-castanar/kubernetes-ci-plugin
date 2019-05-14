@@ -77,8 +77,8 @@ public class TestChartFactory {
         assertTrue("At least it should contains one service", 1 == build.getServices().size() );
 
         assertTrue("At least it should contains one service", build.getServices().get(0).getKind().equals("Service"));
-        final Service.ApiVersion apiVersion = build.getServices().get(0).getApiVersion();
-        assertTrue("At least it should contains one service", apiVersion.toString().equals("v1"));
+        final String strApiVersion = build.getServices().get(0).getApiVersion();
+        assertTrue("At least it should contains one service", strApiVersion.equals("v1"));
 
         final ServiceSpec spec = build.getServices().get(0).getSpec();
         assertTrue("At least it should contains one service", spec.getPorts().get(0).getPort() == 5672 );

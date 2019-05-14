@@ -49,12 +49,19 @@ public class ChartRepositoryApiImpl implements ChartRepository {
 
         final List<String> chartNames = new ArrayList<>();
 
+        // remove next if block sentences when upgrade this plugin to allow operations in new repository:
+        // https://github.com/helm/charts/tree/master/stable
+        if (repo.getUrl().relativeToRepoPathInCaseOfRepoUrl().length() > 0) {
+            throw new RepositoryException("Repository not supported in this plugin version");
+        }
+
         String defaultRef = (ref == null || ref.equals("")) ? "master" : ref;
 
         final GitHubApiContentsService client = getClient(repo, repo.getUrl().toString(), GitHubApiContentsService
             .class, GitHubApiResponseContentType.JSON);
 
-        client.content(repo.getUrl().ownerInCaseOfRepoUrl(), repo.getUrl().repoInCaseOfRepoUrl(), "", defaultRef)
+        client.content(repo.getUrl().ownerInCaseOfRepoUrl(), repo.getUrl().repoInCaseOfRepoUrl(),
+                        repo.getUrl().relativeToRepoPathInCaseOfRepoUrl(), defaultRef)
             .flatMap(new Func1<List<GitHubContent>, Observable<GitHubContent>>() {
                 @Override
                 public Observable<GitHubContent> call(List<GitHubContent> gitHubContents) {

@@ -43,11 +43,9 @@ public class TestChartBuildSteps extends TestBaseKubernetes {
 
     private static final String FAKE_CHART_NAME = "FakeChartName";
 
-    @Mock
-    private ChartDeploymentService chartDeploymentServiceMock;
+    private final ChartDeploymentService chartDeploymentServiceMock = Mockito.mock(ChartDeploymentService.class);
 
-    @Mock
-    private ChartRepository chartRepositoryMock;
+    private final ChartRepository chartRepositoryMock = Mockito.mock(ChartRepository.class);
 
     @Before
     public void setupMocks() throws Exception {
